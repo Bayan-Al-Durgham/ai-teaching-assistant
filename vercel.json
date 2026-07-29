@@ -4,8 +4,5 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "api/index.py" }
-  ],
-  "env": {
-    "TEACHING_ASSISTANT_DATA_DIR": "/tmp/data"
-  }
+  ]
 }
