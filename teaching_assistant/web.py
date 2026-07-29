@@ -53,7 +53,7 @@ async def _lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="AI Teaching Assistant", lifespan=_lifespan)
+app = FastAPI(title="BayanAI Educator Copilot", lifespan=_lifespan)
 
 
 class ChatRequest(BaseModel):
@@ -98,7 +98,7 @@ def index() -> str:
 
 
 def main() -> None:
-    print(f"AI Teaching Assistant (mock mode) starting at http://{HOST}:{PORT}")
+    print(f"BayanAI Educator Copilot (mock mode) starting at http://{HOST}:{PORT}")
     uvicorn.run(app, host=HOST, port=PORT)
 
 
@@ -107,7 +107,9 @@ _PAGE = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Teaching Assistant (mock mode)</title>
+<title>BayanAI Educator Copilot (mock mode)</title>
+<meta name="description" content="BayanAI Educator Copilot - an AI-powered teaching companion for educators: lesson plans, quizzes, rubrics, and resource recommendations grounded in your course materials.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234f5fe8'/%3E%3Cstop offset='1' stop-color='%2317b3a3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M7 10.5c3-1.5 7-1.5 9 0 2-1.5 6-1.5 9 0v13c-3-1.5-7-1.5-9 0-2-1.5-6-1.5-9 0v-13Z' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 10.5v13' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>
   (function () {
     var saved = null;
@@ -503,7 +505,7 @@ _PAGE = """<!doctype html>
         </svg>
       </div>
       <div>
-        <div class="name">AI Teaching Assistant</div>
+        <div class="name">BayanAI Educator Copilot</div>
         <div class="sub">bio101 · demo workspace</div>
       </div>
     </div>
@@ -570,13 +572,13 @@ _PAGE = """<!doctype html>
         <div class="landing-hero">
           <span class="eyebrow">
             <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M6 10.5v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
-            AI-powered teaching companion
+            BayanAI Educator Copilot
           </span>
           <h1>Help every student learn,<br><span class="accent-text">one conversation at a time</span></h1>
           <p>
-            This assistant answers course questions grounded in your materials, and builds lesson
-            plans, quizzes, rubrics, and resource lists on request &mdash; adapting explanations to
-            each learner's level. This demo runs fully offline in mock mode, so you can try the
+            BayanAI Educator Copilot answers course questions grounded in your materials, and builds
+            lesson plans, quizzes, rubrics, and resource lists on request &mdash; adapting explanations
+            to each learner's level. This demo runs fully offline in mock mode, so you can try the
             whole experience with no API key.
           </p>
           <div class="landing-cta">
@@ -690,6 +692,7 @@ _PAGE = """<!doctype html>
 
       <section class="view" id="view-about">
         <div class="info-card">
+          <span class="tag">BayanAI Educator Copilot</span>
           <span class="tag">Mock Mode</span>
           <h3>No external AI API is called</h3>
           <p>Every response in this demo comes from a deterministic offline mock instead of a real

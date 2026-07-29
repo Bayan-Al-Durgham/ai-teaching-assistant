@@ -1,4 +1,4 @@
-# AI Teaching Assistant
+# BayanAI Educator Copilot
 
 A teaching assistant agent built with [Pydantic AI](https://ai.pydantic.dev). One base agent
 handles conversation, adapts to the student's level, and answers from uploaded course
@@ -28,7 +28,7 @@ teaching-assistant-web
 You'll see:
 
 ```
-AI Teaching Assistant (mock mode) starting at http://127.0.0.1:8000
+BayanAI Educator Copilot (mock mode) starting at http://127.0.0.1:8000
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 

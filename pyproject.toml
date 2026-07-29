@@ -1,7 +1,7 @@
 [project]
 name = "ai-teaching-assistant"
 version = "0.1.0"
-description = "An AI Teaching Assistant built with Pydantic AI: RAG over course materials, lesson plans, quizzes, rubrics, adaptive step-by-step explanations, conversation memory, and resource recommendations."
+description = "BayanAI Educator Copilot, an AI teaching assistant built with Pydantic AI: RAG over course materials, lesson plans, quizzes, rubrics, adaptive step-by-step explanations, conversation memory, and resource recommendations."
 requires-python = ">=3.10"
 dependencies = [
     "pydantic-ai>=1.0.0",
