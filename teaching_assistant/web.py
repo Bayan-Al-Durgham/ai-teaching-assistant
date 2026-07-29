@@ -108,41 +108,78 @@ _PAGE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Teaching Assistant (mock mode)</title>
+<script>
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('ta-theme'); } catch (e) {}
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 <style>
   :root {
-    color-scheme: dark;
-    --bg: #0b0d13;
-    --surface: #12151d;
-    --surface-2: #171b25;
-    --surface-3: #1d2230;
-    --border: #262b3a;
-    --text: #e9ebf2;
-    --text-dim: #9aa1b8;
-    --text-faint: #656d84;
-    --primary: #6d6bf7;
-    --primary-hover: #5c59f2;
-    --primary-contrast: #ffffff;
-    --accent: #22d3ee;
-    --warn: #f5a623;
-    --warn-bg: #3a2c11;
-    --warn-border: #5b431a;
-    --danger: #f0576b;
+    --primary: #4f5fe8;
+    --primary-hover: #4351d4;
+    --primary-soft: rgba(79,95,232,0.12);
+    --accent: #17b3a3;
+    --accent-soft: rgba(23,179,163,0.14);
+    --warn: #c9820f;
+    --warn-bg: #fbf1de;
+    --warn-border: #edd8a8;
+    --danger: #e0475a;
+    --danger-bg: #fbe9eb;
+    --success: #1ea672;
+    --success-bg: #e6f6ef;
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
-    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 18px; --radius-full: 999px;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.24);
-    --shadow-md: 0 8px 24px rgba(0,0,0,0.28);
+    --radius-sm: 8px; --radius-md: 12px; --radius-lg: 18px; --radius-xl: 24px; --radius-full: 999px;
     --ease: cubic-bezier(.4,0,.2,1);
-    --sidebar-w: 260px;
+    --sidebar-w: 264px;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f5f6fb;
+    --surface: #ffffff;
+    --surface-2: #f4f5fa;
+    --surface-3: #eaecf5;
+    --border: #e3e5f0;
+    --text: #1a1c2b;
+    --text-dim: #5c6079;
+    --text-faint: #8d91a8;
+    --shadow-sm: 0 1px 2px rgba(23,26,53,0.06);
+    --shadow-md: 0 12px 28px rgba(23,26,53,0.09);
+    --primary-contrast: #ffffff;
+    --warn-bg: #fdf3e0; --warn-border: #f0dcae;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e1016;
+    --surface: #161922;
+    --surface-2: #1b1f2a;
+    --surface-3: #222634;
+    --border: #2a2f3f;
+    --text: #edeef5;
+    --text-dim: #a3a8bd;
+    --text-faint: #6d7288;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 12px 28px rgba(0,0,0,0.4);
+    --primary-contrast: #ffffff;
+    --primary: #7c86f2;
+    --primary-hover: #6870e8;
+    --warn-bg: #352a13; --warn-border: #55431c; --warn: #f0b429;
+    --danger-bg: #3a1b20;
+    --success-bg: #103322;
   }
   * { box-sizing: border-box; }
-  ::selection { background: rgba(109,107,247,0.35); }
+  ::selection { background: var(--primary-soft); }
+  html, body { height: 100%; }
   body {
     margin: 0; font-family: -apple-system, "Segoe UI", system-ui, Roboto, sans-serif;
-    background: var(--bg); color: var(--text); height: 100vh; overflow: hidden;
-    -webkit-font-smoothing: antialiased;
+    background: var(--bg); color: var(--text); overflow: hidden;
+    -webkit-font-smoothing: antialiased; transition: background 200ms var(--ease), color 200ms var(--ease);
   }
   button, input, select, textarea { font-family: inherit; }
   a { color: inherit; }
+  h1, h2, h3 { letter-spacing: -0.02em; }
   .icon { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
   .app { display: flex; height: 100vh; }
@@ -151,12 +188,12 @@ _PAGE = """<!doctype html>
   .sidebar {
     width: var(--sidebar-w); flex-shrink: 0; background: var(--surface);
     border-right: 1px solid var(--border); display: flex; flex-direction: column;
-    padding: var(--sp-5) var(--sp-4); gap: var(--sp-6);
-    transition: transform 240ms var(--ease);
+    padding: var(--sp-5) var(--sp-4); gap: var(--sp-5);
+    transition: transform 240ms var(--ease), background 200ms var(--ease), border-color 200ms var(--ease);
   }
   .brand { display: flex; align-items: center; gap: var(--sp-3); padding: 0 var(--sp-2); }
   .brand .logo {
-    width: 36px; height: 36px; border-radius: var(--radius-md); flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: var(--radius-md); flex-shrink: 0;
     background: linear-gradient(135deg, var(--primary), var(--accent));
     display: flex; align-items: center; justify-content: center; color: white;
     box-shadow: var(--shadow-sm);
@@ -165,28 +202,39 @@ _PAGE = """<!doctype html>
   .brand .sub { color: var(--text-faint); font-size: 0.74rem; margin-top: 1px; }
 
   .nav { display: flex; flex-direction: column; gap: var(--sp-1); }
-  .nav-label { color: var(--text-faint); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 0 var(--sp-3); margin-bottom: var(--sp-2); }
+  .nav-label { color: var(--text-faint); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 0 var(--sp-3); margin: var(--sp-2) 0; }
   .nav-item {
     display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3);
     border-radius: var(--radius-sm); color: var(--text-dim); cursor: pointer; border: none;
-    background: transparent; font-size: 0.88rem; font-weight: 500; text-align: left; width: 100%;
+    background: transparent; font-size: 0.87rem; font-weight: 500; text-align: left; width: 100%;
     transition: background 150ms var(--ease), color 150ms var(--ease);
   }
   .nav-item:hover { background: var(--surface-2); color: var(--text); }
-  .nav-item.active { background: var(--surface-3); color: var(--text); }
+  .nav-item.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
   .nav-item.active .icon { color: var(--primary); }
 
-  .sidebar-footer { margin-top: auto; }
+  .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: var(--sp-3); }
   .mode-pill {
     display: flex; align-items: center; gap: var(--sp-2); background: var(--warn-bg);
     border: 1px solid var(--warn-border); color: var(--warn); border-radius: var(--radius-md);
     padding: var(--sp-3); font-size: 0.72rem; font-weight: 600; line-height: 1.35;
   }
-  .mode-pill .icon { width: 15px; height: 15px; }
+  .mode-pill .icon { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .theme-toggle {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: var(--sp-2) var(--sp-3); cursor: pointer; color: var(--text-dim); font-size: 0.8rem; font-weight: 600;
+    transition: background 150ms var(--ease), color 150ms var(--ease);
+  }
+  .theme-toggle:hover { background: var(--surface-3); color: var(--text); }
+  .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 
   .sidebar-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(4,5,9,0.6); z-index: 30;
+    display: none; position: fixed; inset: 0; background: rgba(10,11,20,0.55); z-index: 30;
     opacity: 0; pointer-events: none; transition: opacity 200ms var(--ease);
   }
 
@@ -196,13 +244,14 @@ _PAGE = """<!doctype html>
   .topbar {
     display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-6);
     border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0;
+    transition: border-color 200ms var(--ease);
   }
   .menu-btn {
     display: none; background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
     border-radius: var(--radius-sm); width: 36px; height: 36px; align-items: center; justify-content: center;
     cursor: pointer; flex-shrink: 0;
   }
-  .topbar h1 { font-size: 1rem; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .topbar h1 { font-size: 1rem; margin: 0; font-weight: 700; }
   .topbar .view-desc { color: var(--text-faint); font-size: 0.78rem; margin-top: 1px; }
   .title-group { display: flex; flex-direction: column; }
   .controls { margin-left: auto; display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; }
@@ -230,61 +279,124 @@ _PAGE = """<!doctype html>
   .btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; }
 
   .content { flex: 1; overflow-y: auto; padding: var(--sp-6); }
-  .view { display: none; max-width: 920px; margin: 0 auto; animation: fadeInUp 260ms var(--ease); }
+  .view { display: none; max-width: 960px; margin: 0 auto; animation: fadeInUp 280ms var(--ease); }
   .view.active { display: block; }
 
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.94) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Hero / landing */
+  /* Landing / home view */
+  .landing-hero {
+    text-align: center; padding: var(--sp-7) var(--sp-5) var(--sp-6);
+  }
+  .landing-hero .eyebrow {
+    display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--primary-soft); color: var(--primary);
+    border-radius: var(--radius-full); padding: 0.3rem 0.85rem; font-size: 0.76rem; font-weight: 700;
+    letter-spacing: 0.02em; margin-bottom: var(--sp-5);
+  }
+  .landing-hero h1 {
+    font-size: 2.3rem; margin: 0 0 var(--sp-4); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;
+  }
+  .landing-hero h1 .accent-text {
+    background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text;
+    background-clip: text; color: transparent;
+  }
+  .landing-hero p {
+    color: var(--text-dim); font-size: 1.02rem; line-height: 1.6; max-width: 56ch; margin: 0 auto var(--sp-6);
+  }
+  .landing-cta { display: flex; gap: var(--sp-3); justify-content: center; flex-wrap: wrap; }
+  .btn-lg { padding: 0.75rem 1.4rem; font-size: 0.92rem; border-radius: var(--radius-md); }
+
+  .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); margin-top: var(--sp-7); }
+  .feature-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: var(--sp-5); text-align: left; transition: transform 180ms var(--ease), box-shadow 180ms var(--ease);
+  }
+  .feature-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .feature-item .card-icon {
+    width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; margin-bottom: var(--sp-3);
+  }
+  .feature-item .card-title { font-weight: 700; font-size: 0.92rem; margin-bottom: var(--sp-1); }
+  .feature-item .card-sub { color: var(--text-faint); font-size: 0.8rem; line-height: 1.5; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-4); margin-top: var(--sp-6); }
+  .stat-tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: var(--sp-4) var(--sp-5); display: flex; align-items: center; gap: var(--sp-3);
+  }
+  .stat-tile .stat-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--primary-soft); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .stat-tile .stat-label { color: var(--text-faint); font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .stat-tile .stat-value { font-size: 0.92rem; font-weight: 700; }
+
+  /* Hero / landing (chat welcome) */
   .hero { margin-bottom: var(--sp-6); overflow: hidden; transition: max-height 320ms var(--ease), opacity 220ms var(--ease), margin 320ms var(--ease); max-height: 600px; opacity: 1; }
   .hero.collapsed { max-height: 0; opacity: 0; margin-bottom: 0; }
-  .hero h2 { font-size: 1.5rem; margin: 0 0 var(--sp-2); letter-spacing: -0.02em; }
+  .hero h2 { font-size: 1.5rem; margin: 0 0 var(--sp-2); }
   .hero p { color: var(--text-dim); margin: 0 0 var(--sp-5); font-size: 0.92rem; line-height: 1.55; max-width: 62ch; }
   .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
   .card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
     padding: var(--sp-4); cursor: pointer; text-align: left; color: var(--text); font: inherit;
-    transition: transform 160ms var(--ease), border-color 160ms var(--ease), background 160ms var(--ease);
+    transition: transform 160ms var(--ease), border-color 160ms var(--ease), background 160ms var(--ease), box-shadow 160ms var(--ease);
     display: flex; flex-direction: column; gap: var(--sp-2);
   }
-  .card:hover { transform: translateY(-2px); border-color: var(--primary); background: var(--surface-2); }
+  .card:hover { transform: translateY(-2px); border-color: var(--primary); box-shadow: var(--shadow-sm); }
   .card .card-icon {
-    width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--surface-3);
+    width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--primary-soft);
     display: flex; align-items: center; justify-content: center; color: var(--primary);
   }
   .card .card-title { font-weight: 600; font-size: 0.88rem; }
   .card .card-sub { color: var(--text-faint); font-size: 0.78rem; line-height: 1.4; }
 
-  /* Chat */
+  /* Chat - ChatGPT-style full width rows */
   .chat-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
     display: flex; flex-direction: column; box-shadow: var(--shadow-md); overflow: hidden;
-    height: calc(100vh - 220px); min-height: 420px;
+    height: calc(100vh - 220px); min-height: 420px; transition: border-color 200ms var(--ease);
   }
   .hero.collapsed ~ .chat-card { height: calc(100vh - 160px); }
-  main.log { flex: 1; overflow-y: auto; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
-  .msg-row { display: flex; gap: var(--sp-3); max-width: 82%; animation: fadeInUp 220ms var(--ease); }
-  .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
-  .msg-row.assistant { align-self: flex-start; }
-  .msg-row.system { align-self: center; max-width: 90%; }
+  main.log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding: var(--sp-2) 0; }
+  .msg-row { width: 100%; padding: var(--sp-4) var(--sp-5); animation: fadeInUp 220ms var(--ease); }
+  .msg-row.assistant { background: var(--surface-2); }
+  .msg-row.user { background: transparent; }
+  .msg-row.system { padding: var(--sp-3) var(--sp-5); }
+  .msg-inner { max-width: 720px; margin: 0 auto; display: flex; gap: var(--sp-3); align-items: flex-start; }
   .avatar {
-    width: 30px; height: 30px; border-radius: var(--radius-full); flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: var(--radius-md); flex-shrink: 0;
     display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700;
     color: white; margin-top: 2px;
   }
-  .msg-row.user .avatar { background: linear-gradient(135deg, var(--primary), #9b5bf0); }
-  .msg-row.assistant .avatar { background: linear-gradient(135deg, var(--accent), #2b8fd6); color: #052029; }
-  .bubble { padding: 0.7rem 0.95rem; border-radius: var(--radius-lg); white-space: pre-wrap; line-height: 1.5; font-size: 0.89rem; }
-  .msg-row.user .bubble { background: var(--primary); color: white; border-bottom-right-radius: var(--radius-sm); }
-  .msg-row.assistant .bubble { background: var(--surface-2); border: 1px solid var(--border); border-bottom-left-radius: var(--radius-sm); }
-  .msg-row.system .bubble {
-    background: transparent; border: 1px dashed var(--border); color: var(--text-faint);
-    font-size: 0.78rem; text-align: center; padding: 0.4rem 0.9rem;
+  .msg-row.user .avatar { background: linear-gradient(135deg, var(--primary), #8f6bf0); }
+  .msg-row.assistant .avatar { background: linear-gradient(135deg, var(--accent), #1791c9); }
+  .msg-content { flex: 1; min-width: 0; white-space: pre-wrap; line-height: 1.65; font-size: 0.91rem; padding-top: 3px; }
+  .empty-state {
+    max-width: 460px; margin: var(--sp-7) auto; text-align: center; color: var(--text-faint);
+    display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); animation: fadeInUp 260ms var(--ease);
   }
+  .empty-state .empty-icon {
+    width: 52px; height: 52px; border-radius: var(--radius-full); background: var(--primary-soft); color: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .empty-state .empty-title { color: var(--text); font-weight: 700; font-size: 0.95rem; }
+  .empty-state .empty-sub { font-size: 0.82rem; line-height: 1.5; }
+
+  .error-note {
+    max-width: 720px; margin: 0 auto; display: flex; gap: var(--sp-3); align-items: flex-start;
+    background: var(--danger-bg); border: 1px solid var(--danger); color: var(--danger); border-radius: var(--radius-md);
+    padding: var(--sp-3) var(--sp-4); font-size: 0.85rem; line-height: 1.5;
+  }
+  .error-note .icon { flex-shrink: 0; margin-top: 2px; }
+  .error-note .error-detail { color: var(--text-faint); font-size: 0.76rem; margin-top: var(--sp-1); }
+
   .mock-banner { color: var(--warn); font-weight: 700; display: block; margin-bottom: 0.35rem; font-size: 0.78rem; }
 
-  .typing-dots { display: inline-flex; gap: 4px; padding: 0.15rem 0; }
+  .typing-dots { display: inline-flex; gap: 4px; padding: 0.3rem 0; }
   .typing-dots span {
     width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint);
     animation: typing 1.2s infinite ease-in-out;
@@ -306,8 +418,12 @@ _PAGE = """<!doctype html>
     transition: background 150ms var(--ease), transform 120ms var(--ease);
   }
   .send-btn:hover { background: var(--primary-hover); }
-  .send-btn:disabled { opacity: 0.5; cursor: default; }
+  .send-btn:disabled { opacity: 0.6; cursor: default; }
   .send-btn:active { transform: translateY(1px); }
+  .spinner {
+    width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white; animation: spin 0.7s linear infinite;
+  }
 
   /* Static info views */
   .info-card {
@@ -326,6 +442,23 @@ _PAGE = """<!doctype html>
   .cap-item .card-title { font-weight: 600; font-size: 0.86rem; margin-bottom: var(--sp-1); }
   .cap-item .card-sub { color: var(--text-faint); font-size: 0.78rem; line-height: 1.45; }
 
+  /* Toasts */
+  .toast-stack {
+    position: fixed; top: var(--sp-5); right: var(--sp-5); z-index: 60;
+    display: flex; flex-direction: column; gap: var(--sp-2); max-width: 340px;
+  }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md); padding: var(--sp-3) var(--sp-4); display: flex; gap: var(--sp-3);
+    align-items: flex-start; font-size: 0.83rem; animation: popIn 200ms var(--ease);
+  }
+  .toast .icon { margin-top: 1px; }
+  .toast.success { border-color: var(--success); color: var(--success); }
+  .toast.error { border-color: var(--danger); color: var(--danger); }
+  .toast.info { border-color: var(--primary); color: var(--primary); }
+  .toast .toast-msg { color: var(--text); flex: 1; line-height: 1.4; }
+  .toast.leaving { animation: fadeIn 180ms var(--ease) reverse forwards; }
+
   /* Scrollbars */
   .content::-webkit-scrollbar, main.log::-webkit-scrollbar { width: 8px; }
   .content::-webkit-scrollbar-thumb, main.log::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: var(--radius-full); }
@@ -342,20 +475,27 @@ _PAGE = """<!doctype html>
     .content { padding: var(--sp-4); }
     .card-grid { grid-template-columns: 1fr; }
     .cap-grid { grid-template-columns: 1fr; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat-row { grid-template-columns: 1fr; }
     .controls input.field { width: 6.5rem; }
     .chat-card { height: calc(100vh - 260px); }
     .hero.collapsed ~ .chat-card { height: calc(100vh - 190px); }
-    .msg-row { max-width: 92%; }
+    .landing-hero h1 { font-size: 1.7rem; }
+    .toast-stack { left: var(--sp-3); right: var(--sp-3); max-width: none; }
   }
 </style>
 </head>
 <body>
+<div class="toast-stack" id="toastStack"></div>
 <div class="app">
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="logo">
-        <svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">
+          <path d="M4 6.5c2.5-1.3 5.5-1.3 8 0 2.5-1.3 5.5-1.3 8 0v11c-2.5-1.3-5.5-1.3-8 0-2.5-1.3-5.5-1.3-8 0v-11Z"/>
+          <path d="M12 6.5v11"/>
+        </svg>
       </div>
       <div>
         <div class="name">AI Teaching Assistant</div>
@@ -364,8 +504,13 @@ _PAGE = """<!doctype html>
     </div>
 
     <nav class="nav">
+      <div class="nav-label">Overview</div>
+      <button class="nav-item active" data-view="home" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Home
+      </button>
       <div class="nav-label">Workspace</div>
-      <button class="nav-item active" data-view="chat" type="button">
+      <button class="nav-item" data-view="chat" type="button">
         <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
         Chat
       </button>
@@ -380,6 +525,11 @@ _PAGE = """<!doctype html>
     </nav>
 
     <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle" type="button">
+        <span>Appearance</span>
+        <svg class="icon icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <svg class="icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.9 19.1 1.4-1.4"/><path d="m17.7 6.3 1.4-1.4"/></svg>
+      </button>
       <div class="mode-pill">
         <svg class="icon" viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
         <span>MOCK MODE — no external AI API is called</span>
@@ -393,8 +543,8 @@ _PAGE = """<!doctype html>
         <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
       </button>
       <div class="title-group">
-        <h1 id="viewTitle">Chat</h1>
-        <div class="view-desc" id="viewDesc">Ask about the course material, or request a quiz, lesson plan, rubric, or resources.</div>
+        <h1 id="viewTitle">Home</h1>
+        <div class="view-desc" id="viewDesc">An overview of this workspace.</div>
       </div>
       <div class="controls">
         <input id="studentName" class="field" value="Alex" title="Student name">
@@ -411,7 +561,77 @@ _PAGE = """<!doctype html>
     </header>
 
     <div class="content">
-      <section class="view active" id="view-chat">
+      <section class="view active" id="view-home">
+        <div class="landing-hero">
+          <span class="eyebrow">
+            <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M6 10.5v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+            AI-powered teaching companion
+          </span>
+          <h1>Help every student learn,<br><span class="accent-text">one conversation at a time</span></h1>
+          <p>
+            This assistant answers course questions grounded in your materials, and builds lesson
+            plans, quizzes, rubrics, and resource lists on request &mdash; adapting explanations to
+            each learner's level. This demo runs fully offline in mock mode, so you can try the
+            whole experience with no API key.
+          </p>
+          <div class="landing-cta">
+            <button class="btn btn-primary btn-lg" type="button" data-goto="chat">
+              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+              Start chatting
+            </button>
+            <button class="btn btn-ghost btn-lg" type="button" data-goto="about">Learn how it works</button>
+          </div>
+
+          <div class="stat-row">
+            <div class="stat-tile">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></div>
+              <div>
+                <div class="stat-label">Course</div>
+                <div class="stat-value">bio101 &middot; Photosynthesis</div>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
+              <div>
+                <div class="stat-label">Mode</div>
+                <div class="stat-value">Mock &middot; no API key needed</div>
+              </div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-icon"><svg class="icon" viewBox="0 0 24 24" style="width:17px;height:17px"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div>
+                <div class="stat-label">Capabilities</div>
+                <div class="stat-value">4 specialist tools on demand</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-grid">
+            <div class="feature-item">
+              <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg></div>
+              <div class="card-title">Lesson planning</div>
+              <div class="card-sub">Builds a structured lesson plan for any topic and duration.</div>
+            </div>
+            <div class="feature-item">
+              <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 11.3 12 14l4.5-6"/><circle cx="12" cy="12" r="9"/></svg></div>
+              <div class="card-title">Quiz generation</div>
+              <div class="card-sub">Creates practice questions with a full answer key.</div>
+            </div>
+            <div class="feature-item">
+              <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="3" width="16" height="18" rx="2"/></svg></div>
+              <div class="card-title">Rubric generation</div>
+              <div class="card-sub">Drafts clear grading criteria for any assignment.</div>
+            </div>
+            <div class="feature-item">
+              <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
+              <div class="card-title">Resource recommendations</div>
+              <div class="card-sub">Suggests further reading and practice on a topic.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-chat">
         <div class="hero" id="hero">
           <h2>Welcome back, <span id="heroName">Alex</span> 👋</h2>
           <p>Course materials on photosynthesis are pre-loaded for this demo. Ask a question, or try one of these:</p>
@@ -444,8 +664,8 @@ _PAGE = """<!doctype html>
           <form id="chatForm" class="composer">
             <textarea id="input" placeholder="Ask a question, or ask for a quiz / lesson plan / rubric / resources..."></textarea>
             <button id="sendBtn" class="send-btn" type="submit">
-              <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>
-              Send
+              <svg class="icon send-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg>
+              <span class="send-label">Send</span>
             </button>
           </form>
         </div>
@@ -503,12 +723,34 @@ _PAGE = """<!doctype html>
   const form = document.getElementById('chatForm');
   const input = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
+  const sendIcon = sendBtn.querySelector('.send-icon');
+  const sendLabel = sendBtn.querySelector('.send-label');
   const resetBtn = document.getElementById('resetBtn');
   const studentName = document.getElementById('studentName');
   const level = document.getElementById('level');
   const hero = document.getElementById('hero');
   const heroName = document.getElementById('heroName');
   const sessionId = 'web-session-' + Math.random().toString(36).slice(2);
+
+  // ---- Toast notifications (additive UI polish only) ----
+  const toastStack = document.getElementById('toastStack');
+  const TOAST_ICONS = {
+    success: '<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
+    error: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+    info: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5"/><path d="M12 8h.01"/></svg>',
+  };
+  function showToast(message, type) {
+    type = type || 'info';
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML = (TOAST_ICONS[type] || TOAST_ICONS.info) + '<span class="toast-msg"></span>';
+    el.querySelector('.toast-msg').textContent = message;
+    toastStack.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('leaving');
+      setTimeout(() => el.remove(), 200);
+    }, 3800);
+  }
 
   function initials(name) {
     const trimmed = (name || '').trim();
@@ -517,40 +759,96 @@ _PAGE = """<!doctype html>
     return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
   }
 
-  function addMessage(role, text) {
-    const row = document.createElement('div');
-    row.className = 'msg-row ' + role;
+  function emptyStateNode() {
+    const wrap = document.createElement('div');
+    wrap.className = 'empty-state';
+    wrap.id = 'emptyState';
+    wrap.innerHTML =
+      '<div class="empty-icon"><svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px">' +
+      '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></div>' +
+      '<div class="empty-title">Course materials on photosynthesis are pre-loaded for this demo</div>' +
+      '<div class="empty-sub">Ask a question, or try one of the suggestions above to see what this assistant can do.</div>';
+    return wrap;
+  }
 
-    if (role !== 'system') {
-      const avatar = document.createElement('div');
-      avatar.className = 'avatar';
-      avatar.textContent = role === 'user' ? initials(studentName.value) : 'AI';
-      row.appendChild(avatar);
+  function addMessage(role, text) {
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState) emptyState.remove();
+
+    if (role === 'system') {
+      const row = document.createElement('div');
+      row.className = 'msg-row system';
+      const inner = document.createElement('div');
+      inner.className = 'msg-inner';
+      inner.style.justifyContent = 'center';
+      const pill = document.createElement('div');
+      pill.style.cssText = 'border:1px dashed var(--border); color: var(--text-faint); font-size: 0.78rem; text-align: center; padding: 0.4rem 0.9rem; border-radius: var(--radius-full);';
+      pill.textContent = text;
+      inner.appendChild(pill);
+      row.appendChild(inner);
+      log.appendChild(row);
+      log.scrollTop = log.scrollHeight;
+      return row;
     }
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + role;
+    const inner = document.createElement('div');
+    inner.className = 'msg-inner';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = role === 'user' ? initials(studentName.value) : 'AI';
+    inner.appendChild(avatar);
+
+    const content = document.createElement('div');
+    content.className = 'msg-content';
 
     if (text === 'Thinking...') {
-      bubble.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span>';
+      content.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span>';
     } else if (role === 'assistant' && text.startsWith('[MOCK MODE')) {
       const closeIdx = text.indexOf(']');
       const banner = document.createElement('span');
       banner.className = 'mock-banner';
       banner.textContent = text.slice(0, closeIdx + 1);
-      bubble.appendChild(banner);
-      bubble.appendChild(document.createTextNode(text.slice(closeIdx + 1).trim()));
+      content.appendChild(banner);
+      content.appendChild(document.createTextNode(text.slice(closeIdx + 1).trim()));
     } else {
-      bubble.textContent = text;
+      content.textContent = text;
     }
 
-    row.appendChild(bubble);
+    inner.appendChild(content);
+    row.appendChild(inner);
     log.appendChild(row);
     log.scrollTop = log.scrollHeight;
     return row;
   }
 
-  addMessage('system', 'Course materials on photosynthesis are pre-loaded for this demo. Ask away.');
+  function addErrorNote(friendlyMessage, detail) {
+    const row = document.createElement('div');
+    row.className = 'msg-row system';
+    const inner = document.createElement('div');
+    inner.className = 'msg-inner';
+    const note = document.createElement('div');
+    note.className = 'error-note';
+    note.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><div></div>';
+    const textWrap = note.querySelector('div');
+    const title = document.createElement('div');
+    title.textContent = friendlyMessage;
+    textWrap.appendChild(title);
+    if (detail) {
+      const det = document.createElement('div');
+      det.className = 'error-detail';
+      det.textContent = detail;
+      textWrap.appendChild(det);
+    }
+    inner.appendChild(note);
+    row.appendChild(inner);
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  log.appendChild(emptyStateNode());
 
   function collapseHero() {
     hero.classList.add('collapsed');
@@ -567,12 +865,28 @@ _PAGE = """<!doctype html>
     });
   });
 
+  function setSending(sending) {
+    sendBtn.disabled = sending;
+    sendIcon.style.display = sending ? 'none' : '';
+    sendLabel.textContent = sending ? '' : 'Send';
+    if (sending) {
+      const spin = document.createElement('span');
+      spin.className = 'spinner';
+      spin.id = 'sendSpinner';
+      sendBtn.insertBefore(spin, sendLabel);
+    } else {
+      const spin = document.getElementById('sendSpinner');
+      if (spin) spin.remove();
+      sendLabel.textContent = 'Send';
+    }
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const message = input.value.trim();
     if (!message) return;
     input.value = '';
-    sendBtn.disabled = true;
+    setSending(true);
     collapseHero();
     addMessage('user', message);
     const thinking = addMessage('assistant', 'Thinking...');
@@ -587,28 +901,34 @@ _PAGE = """<!doctype html>
           session_id: sessionId,
         }),
       });
-      if (!resp.ok) throw new Error('Request failed: ' + resp.status);
+      if (!resp.ok) throw new Error('Request failed with status ' + resp.status);
       const data = await resp.json();
       thinking.remove();
       addMessage('assistant', data.reply);
     } catch (err) {
       thinking.remove();
-      addMessage('system', 'Error: ' + err.message);
+      addErrorNote('Something went wrong reaching the assistant. Please try again.', err.message);
+      showToast('Message failed to send', 'error');
     } finally {
-      sendBtn.disabled = false;
+      setSending(false);
       input.focus();
     }
   });
 
   resetBtn.addEventListener('click', async () => {
-    await fetch('/api/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId }),
-    });
-    log.innerHTML = '';
-    hero.classList.remove('collapsed');
-    addMessage('system', 'Conversation history cleared.');
+    try {
+      await fetch('/api/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+      log.innerHTML = '';
+      log.appendChild(emptyStateNode());
+      hero.classList.remove('collapsed');
+      showToast('Conversation history cleared', 'success');
+    } catch (err) {
+      showToast('Could not clear conversation history', 'error');
+    }
   });
 
   input.addEventListener('keydown', (e) => {
@@ -618,13 +938,23 @@ _PAGE = """<!doctype html>
     }
   });
 
-  // Sidebar navigation (view switching only - no new backend calls)
+  // ---- Theme toggle (light/dark, persisted; purely presentational) ----
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('ta-theme', next); } catch (e) {}
+  });
+
+  // ---- Sidebar navigation (view switching only - no new backend calls) ----
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const menuBtn = document.getElementById('menuBtn');
   const viewTitle = document.getElementById('viewTitle');
   const viewDesc = document.getElementById('viewDesc');
   const viewMeta = {
+    home: { title: 'Home', desc: 'An overview of this workspace.' },
     chat: { title: 'Chat', desc: 'Ask about the course material, or request a quiz, lesson plan, rubric, or resources.' },
     materials: { title: 'Course Materials', desc: 'What this session has pre-loaded for retrieval-augmented answers.' },
     about: { title: 'About This Demo', desc: 'How mock mode works and what the assistant can do.' },
@@ -635,16 +965,19 @@ _PAGE = """<!doctype html>
     sidebarOverlay.classList.toggle('open', open);
   }
 
+  function goToView(target) {
+    document.querySelectorAll('.nav-item[data-view]').forEach((b) => b.classList.toggle('active', b.dataset.view === target));
+    document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + target));
+    viewTitle.textContent = viewMeta[target].title;
+    viewDesc.textContent = viewMeta[target].desc;
+    setSidebarOpen(false);
+  }
+
   document.querySelectorAll('.nav-item[data-view]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.nav-item[data-view]').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      const target = btn.dataset.view;
-      document.querySelectorAll('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + target));
-      viewTitle.textContent = viewMeta[target].title;
-      viewDesc.textContent = viewMeta[target].desc;
-      setSidebarOpen(false);
-    });
+    btn.addEventListener('click', () => goToView(btn.dataset.view));
+  });
+  document.querySelectorAll('[data-goto]').forEach((btn) => {
+    btn.addEventListener('click', () => goToView(btn.dataset.goto));
   });
 
   menuBtn.addEventListener('click', () => setSidebarOpen(!sidebar.classList.contains('open')));
