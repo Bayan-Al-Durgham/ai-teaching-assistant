@@ -312,12 +312,17 @@ _PAGE = """<!doctype html>
   .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); margin-top: var(--sp-7); }
   .feature-item {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: var(--sp-5); text-align: left; transition: transform 180ms var(--ease), box-shadow 180ms var(--ease);
+    padding: var(--sp-5); text-align: left; cursor: pointer; font: inherit; color: inherit; width: 100%;
+    display: flex; flex-direction: column; align-items: flex-start;
+    transition: transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
   }
-  .feature-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .feature-item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .feature-item:active { transform: translateY(-1px); }
+  .feature-item:hover .card-icon { background: var(--primary); color: var(--primary-contrast); transform: scale(1.06); }
   .feature-item .card-icon {
     width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);
     display: flex; align-items: center; justify-content: center; margin-bottom: var(--sp-3);
+    transition: background 180ms var(--ease), color 180ms var(--ease), transform 180ms var(--ease);
   }
   .feature-item .card-title { font-weight: 700; font-size: 0.92rem; margin-bottom: var(--sp-1); }
   .feature-item .card-sub { color: var(--text-faint); font-size: 0.8rem; line-height: 1.5; }
@@ -607,26 +612,26 @@ _PAGE = """<!doctype html>
           </div>
 
           <div class="feature-grid">
-            <div class="feature-item">
+            <button class="feature-item" type="button" data-prompt="Build a 45-minute lesson plan on this">
               <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg></div>
               <div class="card-title">Lesson planning</div>
               <div class="card-sub">Builds a structured lesson plan for any topic and duration.</div>
-            </div>
-            <div class="feature-item">
+            </button>
+            <button class="feature-item" type="button" data-prompt="Make me a 5-question quiz on this">
               <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 11.3 12 14l4.5-6"/><circle cx="12" cy="12" r="9"/></svg></div>
               <div class="card-title">Quiz generation</div>
               <div class="card-sub">Creates practice questions with a full answer key.</div>
-            </div>
-            <div class="feature-item">
+            </button>
+            <button class="feature-item" type="button" data-prompt="Create a grading rubric for a lab report">
               <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="3" width="16" height="18" rx="2"/></svg></div>
               <div class="card-title">Rubric generation</div>
               <div class="card-sub">Drafts clear grading criteria for any assignment.</div>
-            </div>
-            <div class="feature-item">
+            </button>
+            <button class="feature-item" type="button" data-prompt="Recommend more resources on this topic">
               <div class="card-icon"><svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
               <div class="card-title">Resource recommendations</div>
               <div class="card-sub">Suggests further reading and practice on a topic.</div>
-            </div>
+            </button>
           </div>
         </div>
       </section>
@@ -860,6 +865,16 @@ _PAGE = """<!doctype html>
 
   document.querySelectorAll('.suggestion').forEach((el) => {
     el.addEventListener('click', () => {
+      input.value = el.dataset.prompt;
+      input.focus();
+    });
+  });
+
+  // Home feature cards: jump to Chat and prefill the input, but never auto-send -
+  // the user reviews/edits the prompt and clicks Send themselves.
+  document.querySelectorAll('.feature-item[data-prompt]').forEach((el) => {
+    el.addEventListener('click', () => {
+      goToView('chat');
       input.value = el.dataset.prompt;
       input.focus();
     });
