@@ -1,0 +1,49 @@
+Introduction to Photosynthesis
+
+Photosynthesis is the process plants, algae, and some bacteria use to turn light energy into
+chemical energy stored in sugar. It happens mainly in the leaves of a plant, inside cell
+structures called chloroplasts.
+
+The overall word equation for photosynthesis is:
+
+carbon dioxide + water + light energy -> glucose + oxygen
+
+Plants take in carbon dioxide through small pores on their leaves called stomata. They absorb
+water through their roots, which travels up to the leaves through a tissue called xylem. Inside
+the chloroplasts, a green pigment called chlorophyll absorbs light energy, mostly from the red
+and blue parts of the light spectrum. This is also why most leaves look green: chlorophyll
+reflects green light instead of absorbing it.
+
+Photosynthesis happens in two main stages.
+
+Stage one is called the light-dependent reactions. These take place in the thylakoid membranes
+inside the chloroplast. Light energy is captured by chlorophyll and used to split water
+molecules into hydrogen and oxygen. The oxygen is released as a waste product through the
+stomata, which is why photosynthesis is the main source of oxygen in Earth's atmosphere. The
+energy captured in this stage is stored in two molecules, ATP and NADPH, which carry the energy
+into the second stage.
+
+Stage two is called the Calvin cycle, or the light-independent reactions. This happens in the
+stroma, the fluid-filled space inside the chloroplast. The ATP and NADPH from stage one provide
+the energy to combine carbon dioxide with other molecules in a repeating cycle, eventually
+building glucose, a simple sugar. The plant uses glucose for energy and as a building block to
+grow new cells, and can also store extra glucose as starch.
+
+A common misconception is that plants only carry out photosynthesis and don't need to
+"breathe." In fact, plants also carry out cellular respiration, like animals do, to release
+the energy stored in glucose. During the day, a healthy plant in good light usually produces
+more oxygen through photosynthesis than it uses through respiration, so it has a net release of
+oxygen. At night, without light, photosynthesis stops but respiration continues, so the plant
+takes in oxygen and releases carbon dioxide.
+
+Several factors affect the rate of photosynthesis: light intensity, carbon dioxide
+concentration, and temperature. Increasing light intensity or carbon dioxide generally speeds
+up photosynthesis, up to a point, after which some other factor becomes the limiting factor.
+Temperature affects the enzymes involved in the Calvin cycle; photosynthesis slows down if it
+gets too cold, and the enzymes can be damaged if it gets too hot.
+
+Photosynthesis matters beyond individual plants. It is the foundation of most food chains on
+Earth, since it is how plants (the producers) create the energy-rich molecules that other
+organisms eat. It is also central to the global carbon cycle, since photosynthesis removes
+carbon dioxide from the atmosphere and cellular respiration (in plants, animals, and decomposers)
+returns it.
