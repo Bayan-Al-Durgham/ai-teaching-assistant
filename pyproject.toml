@@ -7,16 +7,14 @@ dependencies = [
     "pydantic-ai>=1.0.0",
     "numpy>=1.26",
     "python-dotenv>=1.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
-]
-web = [
-    "fastapi>=0.115",
-    "uvicorn>=0.30",
 ]
 
 [project.scripts]
